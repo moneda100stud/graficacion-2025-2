@@ -1,4 +1,4 @@
-# Práctica 1: Movimiento Básico y Límites de Pantalla
+# Práctica 1: Movimiento Básico y Límites de Pantalla (finalizado)
 
 ## Descripción
 

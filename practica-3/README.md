@@ -1,4 +1,5 @@
-# Práctica 3: Disparos en Múltiples Direcciones
+# Práctica 3: Disparos en Múltiples Direcciones (finalizado)
+)
 
 ## Descripción
 

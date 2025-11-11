@@ -1,4 +1,5 @@
-# Práctica 2: Gravedad y Doble Salto
+# Práctica 2: Gravedad y Doble Salto (finalizado)
+
 
 ## Descripción
 
