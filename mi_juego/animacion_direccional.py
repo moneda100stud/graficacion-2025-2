@@ -9,33 +9,40 @@ pygame.display.set_caption("Animación Direccional - Sprite Sheet")
 # --- Cargar Sprite Sheet ---
 sprite_sheet = pygame.image.load("personaje_direcciones.png").convert_alpha()
 
-# --- Dimensiones de los fotogramas ---
+# --- Dimensiones de los fotogramas (¡CORRECCIÓN CLAVE!) ---
+# Ahora cada sprite mide 64x64 en la hoja
 FRAME_ANCHO = 220
-FRAME_ALTO = 220
-FILAS = 4      # Una fila por dirección
-COLUMNAS = 4    # Cuatro fotogramas por fila
+FRAME_ALTO = 298
+FILAS = 4     # Una fila por dirección
+COLUMNAS = 4   # Cuatro fotogramas por fila
 
-# --- Tamaño del personaje en pantalla ---
-JUGADOR_ANCHO = 80
-JUGADOR_ALTO = 80
+sprite_sheet.set_colorkey((255, 255, 255))  # Color de transparencia (Blanco)
+
+# --- Tamaño del personaje en pantalla (Se ajusta al mismo tamaño, 64x64) ---
+# Si quisieras el doble de tamaño (128x128), cambiarías estos valores.
+JUGADOR_ANCHO = 64
+JUGADOR_ALTO = 64
 
 # --- Función para extraer los cuadros de una fila ---
 def obtener_frames(fila):
     frames = []
     for i in range(COLUMNAS):
+        # Utiliza las dimensiones CORRECTAS (64x64) para el recorte
         rect = pygame.Rect(i * FRAME_ANCHO, fila * FRAME_ALTO, FRAME_ANCHO, FRAME_ALTO)
         frame = sprite_sheet.subsurface(rect).copy().convert_alpha()
-        # Escalamos el frame al tamaño deseado para el jugador
+        
+        # Escalamos el frame al tamaño deseado para el jugador (64x64)
         frame_escalado = pygame.transform.scale(frame, (JUGADOR_ANCHO, JUGADOR_ALTO))
         frames.append(frame_escalado)
     return frames
 
-# --- Diccionario con las animaciones de cada dirección ---
+# --- Diccionario con las animaciones de cada dirección (Mapeo corregido) ---
+# Asumiendo el orden estándar: Fila 0=Abajo, Fila 1=Izquierda, Fila 2=Derecha, Fila 3=Arriba
 animaciones = {
-    "arriba": obtener_frames(0),
-    "izquierda": obtener_frames(1),
-    "abajo": obtener_frames(2),
-    "derecha": obtener_frames(3)
+    "abajo": obtener_frames(0),
+    "izquierda": obtener_frames(2),
+    "derecha": obtener_frames(1),
+    "arriba": obtener_frames(3)
 }
 
 # --- Variables de juego ---
@@ -82,11 +89,12 @@ while ejecutando:
             frame_index = (frame_index + 1) % len(animaciones[direccion])
             ultimo_tiempo = ahora
     else:
-        frame_index = 0  # quieto muestra primer frame
+        frame_index = 0  # quieto muestra primer frame de la dirección actual
 
     # --- Dibujar ---
     VENTANA.fill((90, 150, 255))
-    VENTANA.blit(animaciones[direccion][frame_index], (x, y))
+    # Centrar el sprite en las coordenadas (x, y)
+    VENTANA.blit(animaciones[direccion][frame_index], (x - JUGADOR_ANCHO // 2, y - JUGADOR_ALTO // 2)) 
     pygame.display.flip()
     reloj.tick(60)
 
