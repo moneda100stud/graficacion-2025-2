@@ -8,6 +8,9 @@ pygame.display.set_caption("Animación Direccional - Sprite Sheet")
 
 # --- Cargar Sprite Sheet ---
 sprite_sheet = pygame.image.load("personaje_direcciones.png").convert_alpha()
+# --- Cargar y escalar el fondo ---
+fondo = pygame.image.load("fondo-juego.png").convert()
+fondo = pygame.transform.scale(fondo, (ANCHO, ALTO))
 
 # --- Dimensiones de los fotogramas (¡CORRECCIÓN CLAVE!) ---
 # Ahora cada sprite mide 64x64 en la hoja
@@ -45,6 +48,11 @@ animaciones = {
     "arriba": obtener_frames(3)
 }
 
+# --- Animación de "quieto" (idle) ---
+# Usaremos el primer y tercer cuadro de la animación "abajo" para un efecto de respiración.
+animacion_quieto = [animaciones["abajo"][0], animaciones["abajo"][2]]
+tiempo_animacion_quieto = 400 # Hacemos que la animación de quieto sea más lenta
+
 # --- Variables de juego ---
 x, y = ANCHO // 2, ALTO // 2
 velocidad = 3
@@ -53,6 +61,7 @@ frame_index = 0
 ultimo_tiempo = pygame.time.get_ticks()
 tiempo_animacion = 150  # milisegundos entre cuadros
 reloj = pygame.time.Clock()
+estaba_moviendose = False # Nueva variable para detectar cambio de estado
 
 # --- Bucle principal ---
 ejecutando = True
@@ -82,19 +91,43 @@ while ejecutando:
         direccion = "derecha"
         moviendo = True
 
+    # --- Límites de la pantalla ---
+    # El personaje se dibuja desde su centro, así que usamos la mitad de su tamaño para los bordes.
+    mitad_ancho = JUGADOR_ANCHO // 2
+    mitad_alto = JUGADOR_ALTO // 2
+    if x < mitad_ancho:
+        x = mitad_ancho
+    if x > ANCHO - mitad_ancho:
+        x = ANCHO - mitad_ancho
+    if y < mitad_alto:
+        y = mitad_alto
+    if y > ALTO - mitad_alto:
+        y = ALTO - mitad_alto
+
+    # --- Reiniciar índice si el estado de movimiento cambia ---
+    if moviendo != estaba_moviendose:
+        frame_index = 0
+    estaba_moviendose = moviendo
+
     # --- Actualizar animación ---
     ahora = pygame.time.get_ticks()
     if moviendo:
+        # Animación de caminar
+        # Asegurarse de que el índice no se salga de rango para la animación actual
         if ahora - ultimo_tiempo > tiempo_animacion:
             frame_index = (frame_index + 1) % len(animaciones[direccion])
             ultimo_tiempo = ahora
     else:
-        frame_index = 0  # quieto muestra primer frame de la dirección actual
+        # Animación de quieto (idle)
+        if ahora - ultimo_tiempo > tiempo_animacion_quieto:
+            frame_index = (frame_index + 1) % len(animacion_quieto)
+            ultimo_tiempo = ahora
 
     # --- Dibujar ---
-    VENTANA.fill((90, 150, 255))
+    VENTANA.blit(fondo, (0, 0)) # Dibuja la imagen de fondo
     # Centrar el sprite en las coordenadas (x, y)
-    VENTANA.blit(animaciones[direccion][frame_index], (x - JUGADOR_ANCHO // 2, y - JUGADOR_ALTO // 2)) 
+    frame_actual = animacion_quieto[frame_index] if not moviendo else animaciones[direccion][frame_index]
+    VENTANA.blit(frame_actual, (x - JUGADOR_ANCHO // 2, y - JUGADOR_ALTO // 2)) 
     pygame.display.flip()
     reloj.tick(60)
 
